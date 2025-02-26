@@ -17,23 +17,27 @@ Aurelis is an enterprise-grade AI-powered coding assistant that leverages multip
   - Encrypted credential storage
 
 - **Advanced Capabilities**
+  - Automated code testing and validation
   - Vector-based conversation history (FAISS)
   - Multi-threaded asynchronous processing
   - Integrated web search aggregation
   - Enterprise code pattern detection
+  - Real-time code quality checks
 
 - **Developer Workflow Integration**
-  - Smart file handling with workspace awareness
+  - Smart workspace management
   - Automatic code formatting
   - Intelligent context management
   - Real-time code analysis
+  - One-click code copying
+  - Built-in code testing
 
 ## Installation
 
 ### Production Environment
 
 ```bash
-pip install aurelis-assistant
+pip install aurelis
 ```
 
 ### Development Setup
@@ -82,13 +86,25 @@ aurelis chat --workspace /path/to/project
 ### Command Reference
 
 #### Chat Interface Commands
+- `/workspace <path>` - Change current workspace
 - `/toggle reasoning` - Enable/disable enhanced reasoning
 - `/toggle search` - Enable/disable web search integration
+- `/toggle testing` - Enable/disable automatic code testing
 - `/help` - Display command reference
 - `exit` - Terminate session
 
+#### Code Generation Features
+- Automatic code testing
+- Code quality validation
+- One-click code copying
+- Syntax highlighting
+- Line numbers
+- Automatic error fixing
+- Code block extraction
+
 #### File Operations
 - Use `#filename` syntax to reference or create files
+- Files are created in current workspace
 - Example: `#main.py create a new Flask application`
 
 ### Enterprise Integration
@@ -98,12 +114,22 @@ aurelis chat --workspace /path/to/project
 # Initialize in project directory
 aurelis chat -w /path/to/project
 
+# Change workspace during chat
+/workspace /new/path
+
 # Analyze specific file
 aurelis analyze /path/to/file.py "Review code quality"
 
 # Edit with AI assistance
 aurelis edit /path/to/file.py
 ```
+
+#### Code Testing & Validation
+- Automatic static analysis
+- Built-in unit test generation
+- Code quality checks
+- Error detection and fixing
+- Test case extraction from docstrings
 
 #### Search Integration
 ```bash

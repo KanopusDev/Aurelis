@@ -4,6 +4,7 @@ import click
 import logging
 import asyncio
 import pyperclip
+from tempfile import TemporaryDirectory
 from rich.live import Live
 from rich.table import Table
 from rich.syntax import Syntax
@@ -18,12 +19,13 @@ from aurelis.core.file import FileManager
 from aurelis.core.database import VectorDB
 from aurelis.core.reasoner import ReasoningResult
 from aurelis.utils.config import Config
+from aurelis.utils.code_utils import extract_code_blocks, format_code_block
+from aurelis.utils.testing import run_static_analysis, run_unit_tests
 from pathlib import Path
 import datetime
 from typing import Dict, Optional, Any, Tuple
 from dotenv import load_dotenv
 from aurelis.cli import handle_cli_arguments
-from aurelis.utils.code_utils import extract_code_blocks, format_code_block
 
 # Initialize console before logging setup
 console = Console()
@@ -156,7 +158,7 @@ def cli(ctx, log_file, verbose):
     # Override console logging level if verbose flag is set
     if verbose:
         console_handler = next((h for h in logging.root.handlers if isinstance(h, RichHandler)), None)
-        if console_handler:
+        if (console_handler):
             console_handler.setLevel(logging.INFO)
             logger.info("Verbose logging enabled")
     
