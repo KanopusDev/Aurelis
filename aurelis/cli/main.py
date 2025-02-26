@@ -27,6 +27,7 @@ from aurelis.utils.code_utils import extract_code_blocks, format_code_block
 
 # Initialize console before logging setup
 console = Console()
+
 def setup_logging(log_file: Optional[Path] = None) -> Path:
     """
     Configure application logging with file and console handlers.
