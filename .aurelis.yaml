@@ -1,0 +1,25 @@
+# Aurelis Configuration for GitHub Models
+github_token: "${GITHUB_TOKEN}"  # Use environment variable
+
+models:
+  primary: "codestral-2501"       # Primary model for code tasks
+  fallback: "gpt-4o-mini"         # Fallback model for reliability
+  
+analysis:
+  max_file_size: "1MB"
+  chunk_size: 3500               # Optimized for 4K context models
+  overlap_ratio: 0.15
+  
+processing:
+  max_retries: 3
+  timeout: 60
+  concurrent_requests: 5
+  
+security:
+  audit_logging: true
+  secure_token_storage: true
+
+cache:
+  enabled: true
+  ttl: 3600  # 1 hour
+  max_size: 1000
