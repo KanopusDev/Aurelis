@@ -211,8 +211,7 @@ jobs:
     needs: [build-package]
     if: |
       (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'testpypi') ||
-      (github.event_name == 'release' && needs.validate-release.outputs.is-prerelease == 'true')
-    environment:
+      (github.event_name == 'release' && needs.validate-release.outputs.is-prerelease == 'true')    environment:
       name: testpypi
       url: https://test.pypi.org/project/aurelisai
     steps:
@@ -231,10 +230,9 @@ jobs:
 
       - name: ✅ Verify TestPyPI publication
         run: |
-          sleep 30  # Wait for package to be available
-          pip install --index-url https://test.pypi.org/simple/ \
+          sleep 30  # Wait for package to be available          pip install --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple/ \
-            aurelis==${{ needs.validate-release.outputs.version }}
+            aurelisai==${{ needs.validate-release.outputs.version }}
           echo "✅ Package successfully installed from TestPyPI"
 
   publish-pypi:
@@ -243,10 +241,9 @@ jobs:
     needs: [validate-release, build-package, publish-testpypi]
     if: |
       (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'pypi') ||
-      (github.event_name == 'release' && needs.validate-release.outputs.is-prerelease == 'false')
-    environment:
+      (github.event_name == 'release' && needs.validate-release.outputs.is-prerelease == 'false')    environment:
       name: pypi
-      url: https://pypi.org/project/aurelis
+      url: https://pypi.org/project/aurelisai
     steps:
       - name: 📥 Download build artifacts
         uses: actions/download-artifact@v3
@@ -289,7 +286,7 @@ jobs:
         if: needs.publish-pypi.result == 'success'
         run: |
           echo "🎉 Aurelis v${{ needs.validate-release.outputs.version }} successfully published to PyPI!"
-          echo "🔗 Available at: https://pypi.org/project/aurelis/"
+          echo "🔗 Available at: https://pypi.org/project/aurelisai/"
 
       - name: ❌ Failure notification
         if: needs.publish-pypi.result == 'failure'

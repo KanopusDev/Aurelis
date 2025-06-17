@@ -1,16 +1,17 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [project]
-name = "aurelis"
+name = "aurelisai"
 version = "1.0.0"
 description = "Enterprise-grade CLI-based AI code assistant powered by GitHub Models"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "Gamecooler19", email = "pradyumn.tandon@kanopus.org"}
+    {name = "Gamecooler19", email = "pradyumn.tandon@kanopus.org"},
+    {name = "Kanopus Development Team", email = "support@kanopus.org"}
 ]
 maintainers = [
     {name = "Kanopus Development Team", email = "support@kanopus.org"}
@@ -29,52 +30,28 @@ classifiers = [
     "Topic :: Software Development :: Quality Assurance",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-
 dependencies = [
     "click>=8.1.7",
-    "typer>=0.9.0",
+    "typer>=0.9.0,<0.10.0",
     "rich>=13.7.0",
     "pydantic>=2.5.0",
     "aiohttp>=3.9.1",
     "azure-ai-inference>=1.0.0b4",
     "azure-core>=1.29.0",
     "python-dotenv>=1.0.0",
-    "gitpython>=3.1.40",
-    "pygments>=2.17.2",
-    "tree-sitter>=0.20.4",
-    "tree-sitter-python>=0.20.4",
+    "gitpython>=3.1.40",    "pygments>=2.17.2",
     "psutil>=5.9.6",
     "watchdog>=3.0.0",
     "cryptography>=41.0.7",
     "sqlalchemy>=2.0.25",
     "alembic>=1.13.1",
-    "black>=23.12.1",
-    "ruff>=0.1.8",
-    "mypy>=1.8.0",
     "prompt-toolkit>=3.0.0",
     "aiofiles>=23.2.0",
     "PyYAML>=6.0.1",
     "jinja2>=3.1.0",
     "requests>=2.31.0",
     "packaging>=23.0",
-    "asyncio>=3.4.3",
 ]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.4.3",
-    "pytest-cov>=4.1.0",
-    "pytest-asyncio>=0.21.1",
-    "black>=23.12.1",
-    "ruff>=0.1.8",
-    "mypy>=1.8.0",
-    "pre-commit>=3.6.0",
-    "sphinx>=7.2.6",
-    "sphinx-rtd-theme>=2.0.0",
-]
-
-[project.scripts]
-aurelis = "aurelis.cli.main:app"
 
 [project.urls]
 Homepage = "https://aurelis.kanopus.org"
@@ -83,10 +60,63 @@ Repository = "https://github.com/kanopusdev/aurelis"
 Issues = "https://github.com/kanopusdev/aurelis/issues"
 Changelog = "https://github.com/kanopusdev/aurelis/blob/main/CHANGELOG.md"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["aurelis*"]
-exclude = ["tests*"]
+[project.scripts]
+aurelis = "aurelis.cli.main:app"
+
+[tool.poetry]
+packages = [{include = "aurelis"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+click = "^8.1.7"
+typer = "^0.9.0"
+rich = "^13.7.0"
+pydantic = "^2.5.0"
+aiohttp = "^3.9.1"
+azure-ai-inference = "^1.0.0b4"
+azure-core = "^1.29.0"
+python-dotenv = "^1.0.0"
+gitpython = "^3.1.40"
+pygments = "^2.17.2"
+tree-sitter = "^0.20.4"
+tree-sitter-python = "^0.20.4"
+psutil = "^5.9.6"
+watchdog = "^3.0.0"
+cryptography = "^41.0.7"
+sqlalchemy = "^2.0.25"
+alembic = "^1.13.1"
+prompt-toolkit = "^3.0.0"
+aiofiles = "^23.2.0"
+PyYAML = "^6.0.1"
+jinja2 = "^3.1.0"
+requests = "^2.31.0"
+packaging = "^23.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+pytest-asyncio = "^0.21.1"
+black = "^23.12.1"
+ruff = "^0.1.8"
+mypy = "^1.8.0"
+pre-commit = "^3.6.0"
+sphinx = "^7.2.6"
+sphinx-rtd-theme = "^2.0.0"
+flake8 = "^6.1.0"
+pylint = "^3.0.3"
+isort = "^5.13.0"
+bandit = "^1.7.5"
+pip-audit = "^2.6.0"
+safety = "^2.3.0"
+radon = "^6.0.1"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+pytest-asyncio = "^0.21.1"
+pytest-mock = "^3.12.0"
+pytest-xdist = "^3.5.0"
+coverage = "^7.3.4"
 
 [tool.black]
 line-length = 100

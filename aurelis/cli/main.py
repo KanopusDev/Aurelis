@@ -38,8 +38,7 @@ from aurelis.core.exceptions import AurelisError
 app = typer.Typer(
     name="aurelis",
     help="Aurelis - Enterprise AI Code Assistant powered by GitHub models",
-    add_completion=False,
-    rich_markup_mode="rich"
+    add_completion=False
 )
 
 # Initialize Rich console for enhanced output
