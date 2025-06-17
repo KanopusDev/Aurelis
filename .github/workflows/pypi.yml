@@ -120,7 +120,8 @@ release-build:
         with:
           name: release-dists
           path: dist/
-          retention-days: 7  pypi-publish:
+          retention-days: 7  
+          pypi-publish:
     runs-on: ubuntu-latest
     needs:
       - release-build
