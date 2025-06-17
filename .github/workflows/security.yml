@@ -12,7 +12,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.11"
-  POETRY_VERSION: "1.7.1"
+  POETRY_VERSION: "latest"
 
 permissions:
   contents: read
@@ -71,7 +71,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: 📦 Install Poetry
-        uses: snok/install-poetry@v1
+        uses: snok/install-poetry@v1.3.4
         with:
           version: ${{ env.POETRY_VERSION }}
 
@@ -168,7 +168,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: 📦 Install Poetry
-        uses: snok/install-poetry@v1
+        uses: snok/install-poetry@v1.3.4
         with:
           version: ${{ env.POETRY_VERSION }}
 
