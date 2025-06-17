@@ -419,8 +419,27 @@ We follow [Semantic Versioning](https://semver.org/):
 2. **Testing**: Comprehensive testing of release candidate
 3. **Documentation**: Update documentation
 4. **Release notes**: Prepare release notes
-5. **Tag release**: Create git tag and GitHub release
-6. **Deploy**: Deploy to production environments
+5. **Run release script**: Execute `python scripts/release.py [patch|minor|major]`
+   - This updates version in pyproject.toml
+   - Creates git tag and commit
+   - Prompts to push changes to GitHub
+   - Can create a GitHub Release
+6. **GitHub Release**: Create release via GitHub UI or CLI
+7. **PyPI Publishing**: Automated via GitHub Actions workflow
+8. **Deploy**: Deploy to production environments
+
+### PyPI Publishing
+
+We use GitHub Actions to automatically publish releases to PyPI:
+
+1. Create and publish a new GitHub Release
+2. The `publish-pypi.yml` workflow triggers automatically
+3. Package is built using Poetry and uploaded to PyPI
+4. Verify the package is available at https://pypi.org/p/aurelisai
+
+To modify the publishing process:
+- Edit `.github/workflows/publish-pypi.yml`
+- Configure PyPI trusted publishing in the GitHub repository settings
 
 ## Questions?
 
@@ -439,28 +458,35 @@ Thank you for contributing to Aurelis! Your contributions help make AI-powered d
 
 ```bash
 # Set up development environment
-pip install -e ".[dev]"
-pre-commit install
+poetry install
 
 # Run tests
-pytest tests/
-pytest tests/ -v --cov=aurelis
+poetry run pytest tests/
+poetry run pytest tests/ -v --cov=aurelis
 
 # Code quality
-black aurelis/ tests/
-isort aurelis/ tests/
-flake8 aurelis/ tests/
-mypy aurelis/
+poetry run black aurelis/ tests/
+poetry run isort aurelis/ tests/
+poetry run ruff aurelis/ tests/
 
 # Run all checks
-pre-commit run --all-files
+poetry run pre-commit run --all-files
 
 # Start development server
-aurelis serve --debug
+poetry run aurelis serve --debug
 
 # Build documentation
 cd docs/
-make html
+poetry run make html
+
+# Build package locally
+poetry build
+
+# Check package
+poetry run twine check dist/*
+
+# Bump version (patch, minor, major)
+poetry version patch
 ```
 
 ### File Structure
