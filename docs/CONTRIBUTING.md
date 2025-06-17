@@ -430,12 +430,23 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ### PyPI Publishing
 
-We use GitHub Actions to automatically publish releases to PyPI:
+We use GitHub Actions to automatically publish releases to PyPI. The workflow can be triggered in two ways:
 
+#### Automated Release Publishing
 1. Create and publish a new GitHub Release
 2. The `publish-pypi.yml` workflow triggers automatically
 3. Package is built using Poetry and uploaded to PyPI
 4. Verify the package is available at https://pypi.org/p/aurelisai
+
+#### Manual Publishing
+1. Go to the "Actions" tab in the GitHub repository
+2. Select the "Upload Python Package" workflow
+3. Click "Run workflow"
+4. Choose environment (test or pypi)
+   - `test` publishes to TestPyPI (https://test.pypi.org)
+   - `pypi` publishes to production PyPI (https://pypi.org)
+5. Optionally override the version (otherwise uses version from pyproject.toml)
+6. Click "Run workflow"
 
 To modify the publishing process:
 - Edit `.github/workflows/publish-pypi.yml`
@@ -479,14 +490,14 @@ poetry run aurelis serve --debug
 cd docs/
 poetry run make html
 
-# Build package locally
-poetry build
+# Test package build locally
+python scripts/test_build.py
 
-# Check package
-poetry run twine check dist/*
+# Test build with dev version and upload to TestPyPI
+python scripts/test_build.py --dev-version --upload
 
-# Bump version (patch, minor, major)
-poetry version patch
+# Create a new release (patch, minor, major)
+python scripts/release.py patch
 ```
 
 ### File Structure

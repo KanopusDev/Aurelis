@@ -1,0 +1,176 @@
+# This workflow will upload the Aurelis Python Package to PyPI
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
+
+name: 🚀 Upload Python Package
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        type: choice
+        options:
+          - test
+          - pypi
+        default: 'pypi'
+        required: true
+      version_override:
+        description: 'Version override (leave empty to use version from pyproject.toml)'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:  
+
+release-build:
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ env.VERSION }}
+      BUILD_TYPE: ${{ steps.build_vars.outputs.BUILD_TYPE }}
+    env:
+      PYTHON_VERSION: "3.10"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set build variables
+        id: build_vars
+        run: |
+          # Determine if this is a release or manual build
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "TRIGGERED_BY=manual" >> $GITHUB_ENV
+            echo "BUILD_TYPE=manual" >> $GITHUB_OUTPUT
+          else
+            echo "TRIGGERED_BY=release" >> $GITHUB_ENV
+            echo "BUILD_TYPE=release" >> $GITHUB_OUTPUT
+          fi
+          echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.6.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root --without dev
+
+      - name: Build release distributions
+        run: |
+          # Build package using Poetry
+          poetry build      - name: Handle version override (manual trigger only)
+        if: github.event_name == 'workflow_dispatch' && inputs.version_override != ''
+        run: |
+          echo "Manual version override: ${{ github.event.inputs.version_override }}"
+          poetry version ${{ github.event.inputs.version_override }}
+          echo "VERSION=$(poetry version -s)" >> $GITHUB_ENV
+
+      - name: Get version if not overridden
+        if: github.event_name != 'workflow_dispatch' || inputs.version_override == ''
+        run: |
+          echo "VERSION=$(poetry version -s)" >> $GITHUB_ENV
+          echo "Using version from pyproject.toml: $(poetry version -s)"
+
+      - name: Verify package
+        run: |
+          echo "Verifying package for version: ${{ env.VERSION }}"
+          ls -la dist/
+          
+          # Check for source distribution
+          if [ ! -f "dist/aurelisai-${{ env.VERSION }}.tar.gz" ]; then
+            echo "Source distribution not found"
+            exit 1
+          fi
+          
+          # Check for wheel distribution
+          if [ ! -f "dist/aurelisai-${{ env.VERSION }}-py3-none-any.whl" ]; then
+            echo "Wheel distribution not found"
+            exit 1
+          fi
+          
+          # Validate package metadata
+          echo "Validating package metadata..."
+          poetry run pip install twine
+          poetry run twine check dist/*
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-dists
+          path: dist/
+          retention-days: 7  pypi-publish:
+    runs-on: ubuntu-latest
+    needs:
+      - release-build
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+
+    # Use the environment specified in the workflow dispatch or default to production PyPI
+    environment:
+      name: ${{ github.event.inputs.environment || 'pypi' }}
+      url: ${{ github.event.inputs.environment == 'test' && 'https://test.pypi.org/p/aurelisai' || 'https://pypi.org/p/aurelisai' }}
+
+    steps:
+      - name: Retrieve release distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: release-dists
+          path: dist/
+
+      - name: Verify artifact contents
+        run: |
+          ls -la dist/
+          echo "Found the following distributions:"
+          find dist -type f | sort      - name: Publish to TestPyPI
+        if: github.event.inputs.environment == 'test'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: dist/
+          verbose: true
+          skip-existing: true      - name: Publish to PyPI
+        if: github.event.inputs.environment != 'test'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          verbose: true
+          
+      - name: Send deployment notification
+        if: always()
+        run: |
+          echo "Package publishing status: ${{ job.status }}"
+          echo "Version: ${{ needs.release-build.outputs.VERSION || env.VERSION }}"
+          echo "Environment: ${{ github.event.inputs.environment || 'pypi' }}"
+          echo "Timestamp: $(date +'%Y-%m-%d %H:%M:%S')"
+          
+          # Create a summary for GitHub Actions UI
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "* **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "* **Version**: ${{ needs.release-build.outputs.VERSION || env.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "* **Environment**: ${{ github.event.inputs.environment || 'pypi' }}" >> $GITHUB_STEP_SUMMARY
+          echo "* **Triggered by**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "* **Actor**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "* **Timestamp**: $(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_STEP_SUMMARY
