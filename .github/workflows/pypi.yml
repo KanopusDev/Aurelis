@@ -1,45 +1,34 @@
-name: 🚀 Upload Python Package
+name: 🚀 Python Package Release
 
 on:
+  workflow_dispatch:
   release:
     types: [published]
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy to'
-        type: choice
-        options:
-          - test
-          - pypi
-        default: 'pypi'
-        required: true
-      version_override:
-        description: 'Version override (leave empty to use version from pyproject.toml)'
-        type: string
-        required: false
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   release-build:
-    runs-on: ubuntu-latest
-    outputs:
-      VERSION: ${{ steps.version_step.outputs.VERSION }}
-      BUILD_TYPE: ${{ steps.build_vars.outputs.BUILD_TYPE }}
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+
     env:
-      PYTHON_VERSION: "3.10"
+      PYTHON_VERSION: '3.10'
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set build variables
-        id: build_vars
+      - name: Set Build Metadata
+        id: meta
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "TRIGGERED_BY=manual" >> $GITHUB_ENV
             echo "BUILD_TYPE=manual" >> $GITHUB_OUTPUT
           else
@@ -48,7 +37,7 @@ jobs:
           fi
           echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -57,189 +46,39 @@ jobs:
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 - --version 1.6.1
-          echo "/home/runner/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
           poetry --version
 
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-
-
-      - name: Handle version
-        id: version_step
+      - name: Configure Dependencies
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version_override }}" ]; then
-            poetry version ${{ github.event.inputs.version_override }}
-          fi
-          VERSION=$(poetry version -s)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "Using version: $VERSION"
+          poetry install --no-interaction --no-root
 
-      - name: Install dependencies
+      - name: Build Package
         run: |
-          poetry install --no-interaction --no-root --without dev --verbose
-          poetry show
+          poetry build
 
-      - name: Build release distributions
-        run: |
-          rm -rf dist/
-          mkdir -p dist/
-          poetry build --verbose
-          ls -la dist/
-
-      - name: Verify package
-        run: |
-          echo "Verifying package for version: ${{ env.VERSION }}"
-          ls -la dist/
-          
-          SOURCE_DIST=$(find dist -name "aurelisai-${{ env.VERSION }}.tar.gz" || echo "")
-          if [ -z "$SOURCE_DIST" ]; then
-            echo "ERROR: Source distribution not found"
-            find dist -type f
-            exit 1
-          else
-            echo "✅ Source distribution found: $SOURCE_DIST"
-          fi
-          
-          WHEEL_DIST=$(find dist -name "aurelisai-${{ env.VERSION }}*.whl" || echo "")
-          if [ -z "$WHEEL_DIST" ]; then
-            echo "ERROR: Wheel distribution not found"
-            find dist -type f
-            exit 1
-          else
-            echo "✅ Wheel distribution found: $WHEEL_DIST"
-          fi
-          
-          pip install --quiet twine
-          twine check dist/* --verbose
-
-      - name: Upload distributions
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-dists
-          path: dist/
-          retention-days: 7
-          if-no-files-found: error
-
-      - name: Package build summary
-        if: always()
+      - name: Display Artifacts Summary
         run: |
           echo "## Package Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "* **Version**: ${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
-          echo "* **Build Timestamp**: ${{ env.TIMESTAMP }}" >> $GITHUB_STEP_SUMMARY
-          echo "* **Trigger**: ${{ env.TRIGGERED_BY }}" >> $GITHUB_STEP_SUMMARY
-          
+          echo "* **Version**: $(poetry version -s)" >> $GITHUB_STEP_SUMMARY
+          echo "* **Build Timestamp**: $TIMESTAMP" >> $GITHUB_STEP_SUMMARY
+          echo "* **Trigger**: $TRIGGERED_BY" >> $GITHUB_STEP_SUMMARY
+
           if [ -d "dist" ]; then
             echo "* **Files**:" >> $GITHUB_STEP_SUMMARY
             for file in dist/*; do
-              filesize=$(du -h "$file" | cut -f1)
-              echo "  - $(basename $file) ($filesize)" >> $GITHUB_STEP_SUMMARY
+              size=$(du -h "$file" | cut -f1)
+              echo "  - $(basename "$file") ($size)" >> $GITHUB_STEP_SUMMARY
             done
           else
             echo "* **Files**: None found" >> $GITHUB_STEP_SUMMARY
           fi
 
-  pypi-publish:
-    runs-on: ubuntu-latest
-    needs: release-build
-    permissions:
-      id-token: write
-    environment:
-      name: ${{ github.event.inputs.environment || 'pypi' }}
-      url: ${{ github.event.inputs.environment == 'test' && 'https://test.pypi.org/p/aurelisai' || 'https://pypi.org/p/aurelisai' }}
-
-    steps:
-      - name: Retrieve release distributions
-        uses: actions/download-artifact@v4
+      - name: Upload Distribution Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: release-dists
+          name: python-distribution
           path: dist/
 
-      - name: Set up Python for verification
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Verify artifact contents
-        run: |
-          VERSION="${{ needs.release-build.outputs.VERSION }}"
-          echo "Using version: $VERSION"
-          
-          ls -la dist/
-          find dist -type f | sort
-          
-          WHEELS=$(find dist -name "*.whl" | wc -l)
-          TARBALLS=$(find dist -name "*.tar.gz" | wc -l)
-          
-          if [ "$WHEELS" -eq 0 ] || [ "$TARBALLS" -eq 0 ]; then
-            echo "ERROR: Missing distributions"
-            exit 1
-          fi
-
-          pip install --quiet twine
-          twine check dist/*
-
-      - name: Publish to TestPyPI
-        id: publish-test
-        if: github.event.inputs.environment == 'test'
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          packages-dir: dist/
-          verbose: true
-          skip-existing: true
-
-      - name: Publish to PyPI
-        id: publish-prod
-        if: github.event.inputs.environment != 'test'
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist/
-          verbose: true
-
-      - name: PyPI Published URL
-        if: steps.publish-prod.outcome == 'success' || steps.publish-test.outcome == 'success'
-        run: |
-          VERSION="${{ needs.release-build.outputs.VERSION }}"
-          ENV="${{ github.event.inputs.environment || 'pypi' }}"
-          echo "Package published:"
-          if [ "$ENV" == "test" ]; then
-            echo "https://test.pypi.org/project/aurelisai/$VERSION/"
-            echo "pip install --index-url https://test.pypi.org/simple/ aurelisai==$VERSION"
-          else
-            echo "https://pypi.org/project/aurelisai/$VERSION/"
-            echo "pip install aurelisai==$VERSION"
-
-      - name: Send deployment notification
-        if: always()
-        run: |
-          VERSION="${{ needs.release-build.outputs.VERSION }}"
-          ENV="${{ github.event.inputs.environment || 'pypi' }}"
-          STATUS="${{ job.status }}"
-          TIMESTAMP="$(date +'%Y-%m-%d %H:%M:%S')"
-          
-          echo "## 📦 PyPI Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Status** | $STATUS |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Version** | $VERSION |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Environment** | $ENV |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Package URL** | https://${ENV}.pypi.org/project/aurelisai/$VERSION/ |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Trigger** | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Actor** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Timestamp** | $TIMESTAMP |" >> $GITHUB_STEP_SUMMARY
-          
-          echo "### Installation" >> $GITHUB_STEP_SUMMARY
-          echo "```bash" >> $GITHUB_STEP_SUMMARY
-          if [ "$ENV" == "test" ]; then
-            echo "pip install --index-url https://test.pypi.org/simple/ aurelisai==$VERSION" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "pip install aurelisai==$VERSION" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "```" >> $GITHUB_STEP_SUMMARY
