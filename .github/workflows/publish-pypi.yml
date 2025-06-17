@@ -204,14 +204,14 @@ jobs:
           name: dist-packages
           path: dist/
           retention-days: 30
-
   publish-testpypi:
     name: 🧪 Publish to TestPyPI
     runs-on: ubuntu-latest
     needs: [build-package]
     if: |
       (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'testpypi') ||
-      (github.event_name == 'release' && needs.validate-release.outputs.is-prerelease == 'true')    environment:
+      (github.event_name == 'release' && needs.validate-release.outputs.is-prerelease == 'true')
+    environment:
       name: testpypi
       url: https://test.pypi.org/project/aurelisai
     steps:
@@ -234,14 +234,14 @@ jobs:
             --extra-index-url https://pypi.org/simple/ \
             aurelisai==${{ needs.validate-release.outputs.version }}
           echo "✅ Package successfully installed from TestPyPI"
-
   publish-pypi:
     name: 🎯 Publish to PyPI
     runs-on: ubuntu-latest
     needs: [validate-release, build-package, publish-testpypi]
     if: |
       (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'pypi') ||
-      (github.event_name == 'release' && needs.validate-release.outputs.is-prerelease == 'false')    environment:
+      (github.event_name == 'release' && needs.validate-release.outputs.is-prerelease == 'false')
+    environment:
       name: pypi
       url: https://pypi.org/project/aurelisai
     steps:
