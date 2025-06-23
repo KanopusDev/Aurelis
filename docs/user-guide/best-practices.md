@@ -1031,79 +1031,19 @@ async def metrics():
     metrics.append(f"aurelis_requests_total {stats.get('total_requests', 0)}")
     metrics.append(f"aurelis_tokens_total {stats.get('total_tokens', 0)}")
     metrics.append(f"aurelis_errors_total {stats.get('total_errors', 0)}")
-    
-    return "\n".join(metrics)
+      return "\n".join(metrics)
 ```
 
-### 2. Scaling Considerations
+### 2. Performance Optimization
 
-#### Horizontal Scaling
+#### Local Performance
 
-```yaml
-# docker-compose.yml
-version: '3.8'
+For single-instance usage, focus on:
 
-services:
-  aurelis-api:
-    image: aurelis/api:latest
-    deploy:
-      replicas: 3
-    environment:
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - REDIS_URL=redis://redis:6379
-    depends_on:
-      - redis
-      
-  redis:
-    image: redis:alpine
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-      
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-
-volumes:
-  redis_data:
-```
-
-#### Load Balancing
-
-```nginx
-# nginx.conf
-upstream aurelis_backend {
-    least_conn;
-    server aurelis-api-1:8000 max_fails=3 fail_timeout=30s;
-    server aurelis-api-2:8000 max_fails=3 fail_timeout=30s;
-    server aurelis-api-3:8000 max_fails=3 fail_timeout=30s;
-}
-
-server {
-    listen 80;
-    
-    location / {
-        proxy_pass http://aurelis_backend;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        
-        # Timeout settings
-        proxy_connect_timeout 30s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-    }
-    
-    location /health {
-        proxy_pass http://aurelis_backend/health;
-        access_log off;
-    }
-}
-```
+- **Response Caching**: Cache frequently used model responses
+- **Connection Pooling**: Reuse HTTP connections to GitHub Models API  
+- **Request Batching**: Combine multiple small requests when possible
+- **Async Processing**: Use async/await for non-blocking operations
 
 ## 📊 Monitoring & Analytics
 

@@ -31,12 +31,6 @@ Quick setup guide to get Aurelis running with GitHub models in minutes.
 - [CLI Interface](api/cli.md)
 - [Error Handling](api/error-handling.md)
 
-### 🚀 [Deployment](deployment/)
-- [Production Deployment](deployment/production.md)
-- [Docker & Containers](deployment/docker.md)
-- [Enterprise Installation](deployment/enterprise.md)
-- [Monitoring & Logging](deployment/monitoring.md)
-
 ## 🎯 Quick Navigation
 
 | Need | Documentation |
@@ -45,7 +39,6 @@ Quick setup guide to get Aurelis running with GitHub models in minutes.
 | **GitHub token setup** | [GitHub Models Integration](user-guide/github-models.md) |
 | **CLI commands** | [CLI Reference](user-guide/cli-reference.md) |
 | **Interactive shell** | [Shell Guide](user-guide/shell-guide.md) |
-| **Production deployment** | [Production Guide](deployment/production.md) |
 | **API integration** | [API Reference](api/) |
 | **Enterprise features** | [Enterprise Architecture](architecture/enterprise.md) |
 
@@ -84,10 +77,10 @@ Quick setup guide to get Aurelis running with GitHub models in minutes.
 This documentation follows enterprise standards for:
 
 - **Comprehensive Coverage**: Every feature, API, and configuration option documented
-- **Production Focus**: Real-world deployment scenarios and enterprise requirements
+- **Production Focus**: Real-world scenarios and enterprise requirements
 - **Code Examples**: Working examples for all features and integrations
-- **Security Guidelines**: Best practices for secure token management and deployment
-- **Performance Optimization**: Guidelines for optimal performance in production
+- **Security Guidelines**: Best practices for secure token management
+- **Performance Optimization**: Guidelines for optimal performance
 
 ## 🤝 Contributing
 

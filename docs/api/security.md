@@ -1039,5 +1039,5 @@ async def process_model_request(request: ModelRequest):
 
 For more information on security-related topics, see:
 - [Configuration Security](configuration.md)
-- [API Security](../deployment/security.md)
-- [Best Practices Guide](../guides/security-best-practices.md)
+- [Security Architecture](../architecture/security.md)
+- [Best Practices Guide](../user-guide/best-practices.md)

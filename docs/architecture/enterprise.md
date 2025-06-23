@@ -1,6 +1,6 @@
 # Enterprise Features & Architecture
 
-**Enterprise-grade capabilities for large-scale AI code assistance deployment**
+**Enterprise-grade capabilities for large-scale AI code assistance**
 
 ## 🏢 Enterprise Overview
 
@@ -716,128 +716,9 @@ data:
     analytics:
       enabled: true
       executive_reports: true
-    
-    high_availability:
+      high_availability:
       enabled: true
       replicas: 5
-
----
-# Enterprise Deployment with advanced features
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: aurelis-enterprise
-  namespace: aurelis-enterprise
-spec:
-  replicas: 5
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 2
-      maxUnavailable: 1
-  selector:
-    matchLabels:
-      app: aurelis-enterprise
-  template:
-    metadata:
-      labels:
-        app: aurelis-enterprise
-        tier: production
-        version: enterprise
-    spec:
-      # Security context
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        fsGroup: 1000
-      
-      # Anti-affinity for high availability
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - aurelis-enterprise
-              topologyKey: kubernetes.io/hostname
-      
-      containers:
-      - name: aurelis-enterprise
-        image: aurelis:enterprise-v1.0.0
-        imagePullPolicy: Always
-        
-        # Resource allocation for enterprise workloads
-        resources:
-          requests:
-            memory: "1Gi"
-            cpu: "500m"
-          limits:
-            memory: "4Gi"
-            cpu: "2000m"
-        
-        # Environment variables
-        env:
-        - name: GITHUB_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: aurelis-enterprise-secrets
-              key: github-token
-        - name: AURELIS_CONFIG
-          value: "/etc/aurelis/enterprise.yaml"
-        - name: AURELIS_ENVIRONMENT
-          value: "enterprise-production"
-        
-        # Volume mounts
-        volumeMounts:
-        - name: config-volume
-          mountPath: /etc/aurelis
-          readOnly: true
-        - name: cache-volume
-          mountPath: /app/cache
-        - name: logs-volume
-          mountPath: /var/log/aurelis
-        
-        # Health checks
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 30
-          timeoutSeconds: 10
-          failureThreshold: 3
-          
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        
-        # Security hardening
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
-      
-      volumes:
-      - name: config-volume
-        configMap:
-          name: aurelis-enterprise-config
-      - name: cache-volume
-        persistentVolumeClaim:
-          claimName: aurelis-cache-pvc
-      - name: logs-volume
-        persistentVolumeClaim:
-          claimName: aurelis-logs-pvc
 ```
 
 ## 📊 Enterprise Monitoring & Observability
@@ -1000,9 +881,8 @@ class EnterpriseROI:
 ---
 
 **📚 Next Steps:**
-- [Production Deployment](../deployment/production.md) - Deploy enterprise features
 - [Security Architecture](security.md) - Understand security model
-- [Monitoring Guide](../deployment/monitoring.md) - Set up enterprise monitoring
+- [Performance Guide](performance.md) - Optimize enterprise performance
 - [Cost Management](../user-guide/best-practices.md#cost-management) - Optimize costs
 
 **🤝 Enterprise Contact:**

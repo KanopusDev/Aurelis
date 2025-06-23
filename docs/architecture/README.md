@@ -177,25 +177,15 @@ AurelisError (Base)
 3. **Graceful Degradation**: Partial functionality on component failure
 4. **User Guidance**: Clear error messages with resolution steps
 
-## Deployment Architecture
+## Development Environment
 
-### Development Environment
+### Local Development Setup
 ```
 Local Machine
 ├── Python 3.8+
 ├── GitHub Token
 ├── Project Configuration (.aurelis.yaml)
 └── Cache Directory (~/.aurelis/cache)
-```
-
-### Production Environment
-```
-Production Server
-├── Container Runtime (Docker/Podman)
-├── Environment Variables (GITHUB_TOKEN)
-├── Persistent Storage (Config + Cache)
-├── Monitoring (Logs + Metrics)
-└── Backup Strategy (Config + Cache)
 ```
 
 ## Monitoring & Observability
@@ -217,7 +207,6 @@ Production Server
 ### Scalability
 - **Horizontal Scaling**: Load balancing across instances
 - **Database Integration**: Persistent storage for enterprise features
-- **Microservices**: Component separation for large deployments
 - **Plugin System**: Third-party integrations
 
 ### Advanced Features
@@ -229,6 +218,6 @@ Production Server
 ## See Also
 
 - [System Overview](system-overview.md)
-- [Model System Architecture](model-system.md)
-- [Security Architecture](security-architecture.md)
-- [Deployment Guide](../deployment/README.md)
+- [GitHub Models Architecture](github-models.md)
+- [Security Architecture](security.md)
+- [Performance Architecture](performance.md)

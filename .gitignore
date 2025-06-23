@@ -392,20 +392,6 @@ aws-credentials
 *.keystore
 *.jks
 
-# Docker
-# ------------------------------------------------------------------------------
-.dockerignore
-Dockerfile.local
-docker-compose.override.yml
-docker-compose.local.yml
-.docker/
-
-# Kubernetes
-# ------------------------------------------------------------------------------
-*.kubeconfig
-k8s-secrets/
-helm-values.local.yml
-
 # Terraform
 # ------------------------------------------------------------------------------
 *.tfstate

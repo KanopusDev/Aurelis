@@ -240,12 +240,11 @@ aurelis shell
 
 ## 🏢 Enterprise Setup
 
-For enterprise deployments, see:
+For enterprise setups, see:
 
-- [Enterprise Installation](../deployment/enterprise.md)
+- [Enterprise Architecture](../architecture/enterprise.md)
 - [Security Configuration](../architecture/security.md)
-- [Production Deployment](../deployment/production.md)
-- [Monitoring Setup](../deployment/monitoring.md)
+- [Performance Configuration](../architecture/performance.md)
 
 ## 📖 Next Steps
 

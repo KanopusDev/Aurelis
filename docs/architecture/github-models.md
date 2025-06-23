@@ -1295,7 +1295,7 @@ class HealthMonitor:
 
 ### Enterprise Support
 - **Email**: enterprise@kanopus.org
-- **Documentation**: [Enterprise Installation](../deployment/enterprise.md)
+- **Documentation**: [Enterprise Architecture](enterprise.md)
 - **Architecture Consulting**: [Contact Sales](https://aurelis.kanopus.org/enterprise)
 
 ---

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Aurelis is an AI-powered code analysis and generation platform built with Python, designed for enterprise-scale deployment and integration. The system follows a modular, microservices-inspired architecture with clean separation of concerns and comprehensive async/await patterns.
+Aurelis is an AI-powered code analysis and generation platform built with Python, designed for enterprise-scale development and integration. The system follows a modular, microservices-inspired architecture with clean separation of concerns and comprehensive async/await patterns.
 
 ## System Architecture
 
@@ -26,7 +26,7 @@ Aurelis is an AI-powered code analysis and generation platform built with Python
 │ Infrastructure  │    │   Data Layer    │    │ External APIs   │
 ├─────────────────┤    ├─────────────────┤    ├─────────────────┤
 │ Load Balancer   │    │ PostgreSQL      │    │ GitHub Models   │
-│ Docker/K8s      │    │ Redis Cache     │    │ Azure OpenAI    │
+│ HTTP Server     │    │ Redis Cache     │    │ Azure OpenAI    │
 │ Monitoring      │    │ File System     │    │ Azure Cognitive │
 │ Logging         │    │ Vector DB       │    │ Services        │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
@@ -202,9 +202,7 @@ Client Request
 
 ### Core Technologies
 
-#### Backend
-- **Python 3.9+**: Primary programming language
-- **FastAPI**: Web framework for REST API
+#### Infrastructure
 - **Uvicorn**: ASGI server for async request handling
 - **Pydantic**: Data validation and serialization
 - **SQLAlchemy**: ORM for database operations
@@ -222,13 +220,6 @@ Client Request
 - **Transformers**: Local model inference
 - **LangChain**: AI application framework
 
-#### Infrastructure
-- **Docker**: Containerization
-- **Kubernetes**: Container orchestration
-- **Nginx**: Reverse proxy and load balancing
-- **Prometheus**: Metrics collection
-- **Grafana**: Monitoring and visualization
-
 ### Development Tools
 
 #### Code Quality
@@ -240,8 +231,6 @@ Client Request
 
 #### DevOps
 - **GitHub Actions**: CI/CD pipeline
-- **Terraform**: Infrastructure as code
-- **Helm**: Kubernetes package management
 - **Sentry**: Error tracking
 
 ## Security Architecture
@@ -296,13 +285,13 @@ Client Request
 │                 Scaling Architecture                    │
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
-│         Load Balancer (Nginx/HAProxy)                  │
+│         Load Balancer (HTTP Server)                    │
 │                       │                                 │
 │       ┌───────────────┼───────────────┐                │
 │       │               │               │                │
 │       ▼               ▼               ▼                │
 │ ┌───────────┐   ┌───────────┐   ┌───────────┐          │
-│ │ API Pod 1 │   │ API Pod 2 │   │ API Pod N │          │
+│ │API Server1│   │API Server2│   │API ServerN│          │
 │ └───────────┘   └───────────┘   └───────────┘          │
 │       │               │               │                │
 │       └───────────────┼───────────────┘                │
@@ -331,89 +320,6 @@ Client Request
 - **Response Compression**: Gzip compression for API responses
 - **Lazy Loading**: Load data only when needed
 - **Background Processing**: Async tasks for non-critical operations
-
-## Deployment Architecture
-
-### Container Strategy
-
-```dockerfile
-# Multi-stage build for optimization
-FROM python:3.11-slim AS builder
-
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-FROM python:3.11-slim AS runtime
-
-# Copy dependencies from builder
-COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
-
-# Copy application code
-COPY aurelis/ /app/aurelius/
-WORKDIR /app
-
-# Create non-root user
-RUN groupadd -r aurelis && useradd -r -g aurelis aurelis
-USER aurelis
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
-
-EXPOSE 8000
-CMD ["uvicorn", "aurelis.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-### Kubernetes Deployment
-
-```yaml
-# Kubernetes deployment configuration
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: aurelis-api
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: aurelis-api
-  template:
-    metadata:
-      labels:
-        app: aurelis-api
-    spec:
-      containers:
-      - name: aurelis-api
-        image: aurelis:latest
-        ports:
-        - containerPort: 8000
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: aurelis-secrets
-              key: database-url
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 5
-```
 
 ## Monitoring & Observability
 
@@ -580,7 +486,7 @@ As the system grows, consider splitting into dedicated microservices:
 │           ▼                ▼                ▼           │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
 │  │    Model    │  │   Model     │  │ Performance │     │
-│  │ Deployment  │  │ Monitoring  │  │  Analytics  │     │
+│  │ Management  │  │ Monitoring  │  │  Analytics  │     │
 │  └─────────────┘  └─────────────┘  └─────────────┘     │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -593,14 +499,14 @@ As the system grows, consider splitting into dedicated microservices:
 2. **Clean Architecture**: Separate concerns with clear boundaries
 3. **SOLID Principles**: Follow object-oriented design principles
 4. **Test-Driven Development**: Write tests before implementation
-5. **Continuous Integration**: Automated testing and deployment
+5. **Continuous Integration**: Automated testing and CI/CD
 
 ### Operational Excellence
 
-1. **Infrastructure as Code**: Version-controlled infrastructure
-2. **Automated Monitoring**: Proactive issue detection
-3. **Disaster Recovery**: Regular backups and recovery testing
-4. **Security First**: Security considerations in all decisions
-5. **Performance Optimization**: Continuous performance monitoring
+1. **Automated Monitoring**: Proactive issue detection
+2. **Disaster Recovery**: Regular backups and recovery testing
+3. **Security First**: Security considerations in all decisions
+4. **Performance Optimization**: Continuous performance monitoring
+5. **Code Quality**: Consistent standards and automated checks
 
-This architecture provides a solid foundation for building, deploying, and scaling Aurelis while maintaining flexibility for future enhancements and requirements.
+This architecture provides a solid foundation for building and scaling Aurelis while maintaining flexibility for future enhancements and requirements.

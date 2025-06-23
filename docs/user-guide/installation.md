@@ -50,30 +50,6 @@ pip install aurelisai
 pip install aurelisai-1.0.0-py3-none-any.whl
 ```
 
-### Method 2: Docker Installation
-
-#### Using Official Docker Image
-```bash
-# Pull the official image
-docker pull aurelis/aurelis:latest
-
-# Run with GitHub token
-docker run -e GITHUB_TOKEN=your_token_here aurelis/aurelis:latest
-```
-
-#### Docker Compose for Development
-```yaml
-version: '3.8'
-services:
-  aurelis:
-    build: .
-    environment:
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
-    volumes:
-      - ./workspace:/workspace
-    working_dir: /workspace
-```
-
 ## 🔧 Configuration Setup
 
 ### 1. Initialize Aurelis Configuration
@@ -158,8 +134,8 @@ aurelis status
 # Store in secure environment variables
 export GITHUB_TOKEN="ghp_your_token_here"
 
-# For Docker environments
-docker run -e GITHUB_TOKEN="$GITHUB_TOKEN" aurelis/aurelis
+# Use in your shell
+aurelis generate "Create a REST API"
 ```
 
 #### Configuration Security
@@ -363,7 +339,7 @@ After successful installation:
 2. **🔧 Configure for your workflow:** [Configuration Guide](configuration.md)
 3. **🚀 Start developing:** Launch `aurelis shell` for interactive development
 4. **🏢 Enterprise setup:** Review [Enterprise Features](../architecture/enterprise.md)
-5. **📊 Monitor usage:** Set up [Monitoring & Logging](../deployment/monitoring.md)
+5. **📊 Monitor usage:** Review [Performance Guide](../architecture/performance.md)
 
 ## 📞 Support
 
