@@ -44,10 +44,10 @@ pip install -e .
 #### Production Installation
 ```bash
 # Install from PyPI (when available)
-pip install aurelisai
+pip install aurelis
 
 # Or install from wheel
-pip install aurelisai-1.0.0-py3-none-any.whl
+pip install aurelis-1.0.0-py3-none-any.whl
 ```
 
 ## 🔧 Configuration Setup
@@ -228,7 +228,7 @@ python --version
 python3 --version
 
 # Use specific Python version
-python3.11 -m pip install aurelisai
+python3.11 -m pip install aurelis
 ```
 
 **2. GitHub Token Issues**
@@ -296,7 +296,7 @@ enterprise:
 #### 2. Multi-User Installation
 ```bash
 # System-wide installation
-sudo pip install aurelisai
+sudo pip install aurelis
 
 # Create shared configuration
 sudo mkdir -p /etc/aurelis

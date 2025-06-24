@@ -14,7 +14,7 @@
 
 ```bash
 # Install from PyPI (recommended)
-pip install aurelisai
+pip install aurelis
 
 # Or install from source
 git clone https://github.com/kanopusdev/aurelis.git

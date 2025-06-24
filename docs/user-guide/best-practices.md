@@ -922,7 +922,7 @@ jobs:
     
     - name: Setup Aurelis
       run: |
-        pip install aurelisai
+        pip install aurelis
         export GITHUB_TOKEN=${{ secrets.AURELIS_TOKEN }}
     
     - name: Run Aurelis Review

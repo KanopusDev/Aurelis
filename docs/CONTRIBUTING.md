@@ -436,7 +436,7 @@ We use GitHub Actions to automatically publish releases to PyPI. The workflow ca
 1. Create and publish a new GitHub Release
 2. The `publish-pypi.yml` workflow triggers automatically
 3. Package is built using Poetry and uploaded to PyPI
-4. Verify the package is available at https://pypi.org/p/aurelisai
+4. Verify the package is available at https://pypi.org/p/aurelis
 
 #### Manual Publishing
 1. Go to the "Actions" tab in the GitHub repository
