@@ -36,7 +36,7 @@ Aurelis is a production-grade, enterprise AI code assistant that leverages GitHu
 
 ### Quick Install
 ```bash
-pip install aurelis
+pip install aurelis-cli
 ```
 
 ### From Source
